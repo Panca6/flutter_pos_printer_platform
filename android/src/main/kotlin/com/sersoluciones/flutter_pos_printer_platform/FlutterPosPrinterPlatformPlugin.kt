@@ -369,22 +369,25 @@ class FlutterPosPrinterPlatformPlugin : FlutterPlugin, MethodCallHandler, Plugin
     }
 
     private fun checkPermissions(): Boolean {
-        val permissions = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-//            Manifest.permission.BLUETOOTH,
-//            Manifest.permission.BLUETOOTH_ADMIN,
-        )
+        val permissions = mutableListOf<String>()
+    
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        permissions.add(Manifest.permission.BLUETOOTH_SCAN)
+        permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+    } else {
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            permissions.add(Manifest.permission.BLUETOOTH_SCAN)
-            permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
-        }
-
-        if (!hasPermissions(context, *permissions.toTypedArray())) {
-            ActivityCompat.requestPermissions(currentActivity!!, permissions.toTypedArray(), PERMISSION_ALL)
+    if (!hasPermissions(context, *permissions.toTypedArray())) {
+        currentActivity?.let {
+            ActivityCompat.requestPermissions(it, permissions.toTypedArray(), PERMISSION_ALL)
+        } ?: run {
+            Log.e(TAG, "Activity is null when requesting permissions")
             return false
         }
-        return true
+        return false
+    }
+    return true
     }
 
     private fun hasPermissions(context: Context?, vararg permissions: String?): Boolean {

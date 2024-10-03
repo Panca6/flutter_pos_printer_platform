@@ -24,7 +24,12 @@ class BluetoothService(private var bluetoothHandler: Handler?) {
     private var result: Result? = null
 
     val mBluetoothAdapter: BluetoothAdapter by lazy {
-        BluetoothAdapter.getDefaultAdapter()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            context?.getSystemService(BluetoothManager::class.java)?.adapter
+        }else{
+            BluetoothAdapter.getDefaultAdapter()
+        }
+        
     }
 
     private val bleScanner by lazy {
